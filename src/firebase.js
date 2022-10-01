@@ -9,5 +9,5 @@ const firebaseConfig = {
     databaseURL: "https://todos-126de-default-rtdb.europe-west1.firebasedatabase.app/"
 };
 
-const firebaseAConfig = initializeApp(firebaseConfig);
-export default firebaseAConfig;
+const firebaseApp = initializeApp(firebaseConfig);
+export default firebaseApp;

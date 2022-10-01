@@ -4,6 +4,9 @@ import TodoList from "./TodoList";
 import TodoAdd from "./TodoAdd";
 import {HashRouter, NavLink, Route, Routes} from "react-router-dom";
 import TodoDetail from "./TodoDetail";
+import {getAuth, onAuthStateChanged } from "firebase/auth"
+import firebaseApp from "./firebase"
+import Register from "./Register";
 
 const date1 = new Date(2021, 7, 19, 14,5);
 const date2 = new Date(2021, 7, 19, 15, 23);
@@ -38,12 +41,17 @@ const initialData = [
 export default class App extends Component{
   constructor(props) {
     super(props);
-    this.state = {data: initialData, showMenu: false};
+    this.state = {
+        data: initialData,
+        showMenu: false,
+        currentUser: undefined
+    };
     this.setDone = this.setDone.bind(this);
     this.delete = this.delete.bind(this);
     this.add = this.add.bind(this);
     this.showMenu = this.showMenu.bind(this);
-    this.getDeed = this.getDeed.bind(this)
+    this.getDeed = this.getDeed.bind(this);
+    this.authStateChanged = this.authStateChanged.bind(this);
   }
   setDone(key) {
       const deed = this.state.data.find((current) => current.key === key);
@@ -70,7 +78,14 @@ export default class App extends Component{
       key = +key;
       return this.state.data.find((current) => current.key === key);
   }
-  render() {
+  authStateChanged(user) {
+    this.setState((state) => ({currentUser: user}));
+  }
+  componentDidMount() {
+      onAuthStateChanged(getAuth(firebaseApp), this.authStateChanged);
+  }
+
+    render() {
     return(
         <HashRouter>
           <nav className="navbar is-light">
@@ -78,7 +93,7 @@ export default class App extends Component{
               <NavLink to='/'
                        className={({isActive}) => 'navbar-item is-uppercase' + (isActive ? ' is-active' : '')
               }>
-                  Todos
+                  {this.state.currentUser ? this.state.currentUser.email : 'Todos'}
               </NavLink>
                 <a href='/'
                    className={this.state.showMenu ? 'navbar-burger is-active' : 'navbar-burger'}
@@ -92,10 +107,18 @@ export default class App extends Component{
               <div className={this.state.showMenu ? 'navbar-menu is-active' : 'navbar-menu'}
                    onClick={this.showMenu}>
                   <div className="navbar-start">
+                      {this.state.currentUser && (
                       <NavLink to='/add'
                                className={({isActive}) => 'navbar-item' + (isActive ? ' is-active' : '')}>
                           Создать дело
                       </NavLink>
+                      )}
+                      {this.state.currentUser && (
+                          <NavLink to="/register"
+                                   className={({isActive}) => 'navbar-item' + (isActive ? 'is-active' : '')}>
+                              Зарегистрироваться
+                          </NavLink>
+                      )}
                   </div>
               </div>
           </nav>
@@ -111,6 +134,9 @@ export default class App extends Component{
                   }/>
                   <Route path = "/:key" element={
                       <TodoDetail getDeed = {this.getDeed}/>
+                  }/>
+                  <Route path = "/register" element={
+                      <Register currentUser = {this.state.currentUser}/>
                   }/>
               </Routes>
           </main>
