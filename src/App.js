@@ -3,27 +3,36 @@ import {Component} from "react";
 import TodoList from "./TodoList";
 import TodoAdd from "./TodoAdd";
 import {HashRouter, NavLink, Route, Routes} from "react-router-dom";
+import TodoDetail from "./TodoDetail";
 
 const date1 = new Date(2021, 7, 19, 14,5);
 const date2 = new Date(2021, 7, 19, 15, 23);
-
+const date3 = new Date(2021, 7, 19, 15, 25);
 const initialData = [
-  {
-      title: 'Изучить React',
-      desc: 'В срочном порядке!',
-      image: '',
-      done: true,
-      createAt: date1.toLocaleString(),
-      key: date1.getTime()
-  },
-  {
-      title: 'Написать React-приложение',
-      desc: 'Список запланированных дел',
-      image: '',
-      done: false,
-      createAt: date2.toLocaleString(),
-      key: date2.getTime()
-  }
+    {
+        title: 'Изучить React',
+        desc: 'В срочном порядке!',
+        image: '',
+        done: true,
+        createAt: date1.toLocaleString(),
+        key: date1.getTime()
+    },
+    {
+        title: 'Написать React-приложение',
+        desc: 'Список запланированных дел',
+        image: '',
+        done: false,
+        createAt: date2.toLocaleString(),
+        key: date2.getTime()
+    },
+    {
+        title: 'Найти ошибку в коде',
+        desc: 'Очень сложно',
+        image: '',
+        done: false,
+        createAt: date3.toLocaleString(),
+        key: date3.getTime()
+    }
 ];
 
 export default class App extends Component{
@@ -34,6 +43,7 @@ export default class App extends Component{
     this.delete = this.delete.bind(this);
     this.add = this.add.bind(this);
     this.showMenu = this.showMenu.bind(this);
+    this.getDeed = this.getDeed.bind(this)
   }
   setDone(key) {
       const deed = this.state.data.find((current) => current.key === key);
@@ -55,6 +65,10 @@ export default class App extends Component{
   showMenu(evt) {
       evt.preventDefault();
       this.setState((state) => ({ showMenu: !state.showMenu}));
+  }
+  getDeed(key) {
+      key = +key;
+      return this.state.data.find((current) => current.key === key);
   }
   render() {
     return(
@@ -87,13 +101,16 @@ export default class App extends Component{
           </nav>
           <main className="content px-6 mt-6">
               <Routes>
-                  <Route path = '/' element={
+                  <Route path = "/" element={
                       <TodoList list = {this.state.data}
                                 setDone = {this.setDone}
                                 delete = {this.delete}/>
                   }/>
-                  <Route path = '/add' element={
+                  <Route path = "/add" element={
                       <TodoAdd add={this.add}/>
+                  }/>
+                  <Route path = "/:key" element={
+                      <TodoDetail getDeed = {this.getDeed}/>
                   }/>
               </Routes>
           </main>
