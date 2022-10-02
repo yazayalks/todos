@@ -9,42 +9,15 @@ import firebaseApp from "./firebase"
 import Register from "./Register";
 import Logout from "./Logout";
 import Login from "./Login";
+import {del, getList, setDone} from "./api";
 
-const date1 = new Date(2021, 7, 19, 14,5);
-const date2 = new Date(2021, 7, 19, 15, 23);
-const date3 = new Date(2021, 7, 19, 15, 25);
-const initialData = [
-    {
-        title: 'Изучить React',
-        desc: 'В срочном порядке!',
-        image: '',
-        done: true,
-        createAt: date1.toLocaleString(),
-        key: date1.getTime()
-    },
-    {
-        title: 'Написать React-приложение',
-        desc: 'Список запланированных дел',
-        image: '',
-        done: false,
-        createAt: date2.toLocaleString(),
-        key: date2.getTime()
-    },
-    {
-        title: 'Найти ошибку в коде',
-        desc: 'Очень сложно',
-        image: '',
-        done: false,
-        createAt: date3.toLocaleString(),
-        key: date3.getTime()
-    }
-];
+
 
 export default class App extends Component{
   constructor(props) {
     super(props);
     this.state = {
-        data: initialData,
+        data: [],
         showMenu: false,
         currentUser: undefined
     };
@@ -55,14 +28,16 @@ export default class App extends Component{
     this.getDeed = this.getDeed.bind(this);
     this.authStateChanged = this.authStateChanged.bind(this);
   }
-  setDone(key) {
+  async setDone(key) {
+      await setDone(this.state.currentUser, key);
       const deed = this.state.data.find((current) => current.key === key);
       if (deed) {
           deed.done = true;
           this.setState((state) => ({}));
       }
   }
-  delete(key) {
+    async delete(key) {
+      await del(this.state.currentUser, key);
       const newData = this.state.data.filter(
           (current) => current.key !== key
       );
@@ -77,11 +52,16 @@ export default class App extends Component{
       this.setState((state) => ({ showMenu: !state.showMenu}));
   }
   getDeed(key) {
-      key = +key;
       return this.state.data.find((current) => current.key === key);
   }
-  authStateChanged(user) {
-    this.setState((state) => ({currentUser: user}));
+
+  async authStateChanged(user) {
+        this.setState((state) => ({ currentUser: user }));
+        if (user) {
+            const newData = await getList(user);
+            this.setState((state) => ({ data: newData }));
+        } else
+            this.setState((state) => ({ data: [] }));
   }
   componentDidMount() {
       onAuthStateChanged(getAuth(firebaseApp), this.authStateChanged);

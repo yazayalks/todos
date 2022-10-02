@@ -1,13 +1,14 @@
 import {Component} from "react";
 import {Navigate} from "react-router-dom";
+import { add } from './api'
 
 export default class TodoAdd extends Component {
     constructor(props) {
         super(props);
         this.state = { redirect: false };
-        this.handleTitleChange = this.handleTitleChange.bind(this);
-        this.handleDescChange = this.handleDescChange.bind(this);
-        this.handleImageChange = this.handleImageChange.bind(this);
+        this.handleTitleBlur = this.handleTitleBlur.bind(this);
+        this.handleDescBlur = this.handleDescBlur.bind(this);
+        this.handleImageBlur = this.handleImageBlur.bind(this);
         this.handleFormSubmit = this.handleFormSubmit.bind(this);
         this.clearFormData();
     }
@@ -15,16 +16,16 @@ export default class TodoAdd extends Component {
         this.formData = {
             title: '',
             desc: '',
-            image: '',
+            image: ''
         };
     }
-    handleTitleChange(evt) {
+    handleTitleBlur(evt) {
         this.formData.title = evt.target.value;
     }
-    handleDescChange(evt) {
+    handleDescBlur(evt) {
         this.formData.desc = evt.target.value;
     }
-    handleImageChange(evt) {
+    handleImageBlur(evt) {
         const cFiles = evt.target.files;
         if (cFiles.length > 0) {
             const fileReader = new FileReader();
@@ -37,16 +38,14 @@ export default class TodoAdd extends Component {
             this.formData.image = '';
         }
     }
-    handleFormSubmit(evt) {
+    async handleFormSubmit(evt) {
         evt.preventDefault();
         const newDeed = { ...this.formData};
         const date = new Date();
         newDeed.done = false;
         newDeed.createdAt = date.toLocaleString();
-        newDeed.key = date.getTime();
-        this.props.add(newDeed);
-        this.clearFormData();
-        evt.target.reset();
+        const addedDeed = await add(this.props.currentUser, newDeed);
+        this.props.add(addedDeed);
         this.setState((state) => ({redirect: true}))
     }
     render() {
@@ -66,7 +65,7 @@ export default class TodoAdd extends Component {
                                 Заголовок
                             </label>
                             <div className="control">
-                                <input type="text" className="input" onChange={this.handleTitleChange}/>
+                                <input type="text" className="input" onChange={this.handleTitleBlur}/>
                             </div>
                         </div>
                         <div className="field">
@@ -74,7 +73,7 @@ export default class TodoAdd extends Component {
                                 Примечание
                             </label>
                             <div className="control">
-                                <textarea onChange={this.handleDescChange} className="textarea"/>
+                                <textarea onChange={this.handleDescBlur} className="textarea"/>
                             </div>
                         </div>
                         <div className="field">
@@ -83,7 +82,7 @@ export default class TodoAdd extends Component {
                                     <input className="file-input"
                                            type="file"
                                            accept="image/*"
-                                           onChange={this.handleImageChange}/>
+                                           onChange={this.handleImageBlur}/>
                                     <span className="file-cta">
                                         <span className="file-label">
                                             Графическая иллюстрация...

@@ -10,7 +10,7 @@ export default function TodoDetail(props) {
             <section>
                 {deed.done && <p className="has-text-success">Выполнено</p>}
                 <h1>{deed.title}</h1>
-                <p>{deed.createAt}</p>
+                <p>{deed.createdAt.toLocaleString()}</p>
                 {deed.desc && <p>{deed.desc}</p>}
                 {deed.image && <p><img src={deed.image} alt="Иллюстрация"/></p>}
             </section>
