@@ -6,7 +6,7 @@ export async function login(email, password) {
         const oUC = await signInWithEmailAndPassword(getAuth(), email, password);
         return oUC.user;
     }
-    catch (err) {
+    catch(err) {
         return err.code;
     }
 }

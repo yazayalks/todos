@@ -6,8 +6,14 @@ import {register} from "./api";
 export default class Register extends Component {
     constructor(props) {
         super(props);
-        this.handleEmailChange = this.handleEmailChange.bind(this);
-        this.handlePasswordChange = this.handlePasswordChange.bind(this);
+        this.state = {
+            errorEmail: '',
+            errorPassword: '',
+            errorPasswordConfirm: '',
+        };
+        this.handleEmailBlur = this.handleEmailBlur.bind(this);
+        this.handlePasswordBlur = this.handlePasswordBlur.bind(this);
+        this.handlePasswordConfirmBlur = this.handlePasswordConfirmBlur.bind(this);
         this.handleFormSubmit = this.handleFormSubmit.bind(this);
         this.clearFormData();
     }
@@ -15,20 +21,76 @@ export default class Register extends Component {
         this.formData = {
             email: '',
             password: '',
+            passwordConfirm: '',
         };
     }
-    handleEmailChange(evt) {
+    handleEmailBlur(evt) {
         this.formData.email = evt.target.value;
     }
-    handlePasswordChange(evt) {
+    handlePasswordBlur(evt) {
         this.formData.password = evt.target.value;
+    }
+    handlePasswordConfirmBlur(evt) {
+        this.formData.passwordConfirm = evt.target.value;
     }
     async handleFormSubmit(evt) {
         evt.preventDefault();
-        const result = await register(this.formData.email, this.formData.password);
-        if (typeof result !== 'object') {
-            console.log(result);
+        if (this.validate()) {
+            const result = await register(this.formData.email, this.formData.password);
+            if (typeof result !== 'object') {
+                this.showErrorMessage(result);
+            }
         }
+
+    }
+    resetErrorMessages() {
+        this.setState((state) => ({
+            errorEmail: '',
+            errorPassword: '',
+            errorPasswordConfirm: '',
+        }));
+    }
+    showErrorMessage(code) {
+        this.resetErrorMessages();
+        if (code === 'auth/email-already-in-use') {
+            this.setState((state) => ({
+                errorEmail: 'Пользователь с таким адресом электронной почты уже зарегистрирован'
+            }));
+        } else if (code === 'auth/weak-password') {
+            this.setState((state) => ({
+                errorPassword: 'Слишком простой пароль',
+                errorPasswordConfirm: 'Слишком простой пароль',
+            }))
+        }
+    }
+    validate() {
+        this.resetErrorMessages();
+        if (!this.formData.email) {
+            this.setState((state) => ({
+                errorEmail: 'Адрес электронной почты не указан'
+            }));
+            return false;
+        }
+        if (!this.formData.password) {
+            this.setState((state) => ({
+                errorPassword: 'Пароль не указан'
+            }));
+            return false;
+        }
+        if (!this.formData.passwordConfirm) {
+            this.setState((state) => ({
+                errorPasswordConfirm: 'Повтор пароля не указан'
+            }));
+            return false;
+        }
+        if(this.formData.password !== this.formData.passwordConfirm) {
+            this.setState((state) => ({
+                errorPassword: 'Введенные пароли не совпадают',
+                errorPasswordConfirm: 'Введенные пароли не совпадают',
+            }));
+            return false;
+        }
+        return true;
     }
     render() {
         if (this.props.currentUser) {
@@ -44,14 +106,35 @@ export default class Register extends Component {
                             </label>
                             <div className="control">
                                 <input type="email" className="input"
-                                onChange={this.handleEmailChange}/>
+                                onChange={this.handleEmailBlur}/>
                             </div>
                         </div>
+                        {this.state.errorEmail &&
+                            <p className="help is-danger">
+                                {this.state.errorEmail}
+                            </p>
+                        }
                         <div className="field">
                             <label className="label">Пароль</label>
                             <div className="control">
-                                <input type="password" className="input" onChange={this.handlePasswordChange}/>
+                                <input type="password" className="input" onChange={this.handlePasswordBlur}/>
                             </div>
+                            {this.state.errorPassword &&
+                                <p className="help is-danger">
+                                    {this.state.errorPassword}
+                                </p>
+                            }
+                        </div>
+                        <div className="field">
+                            <label className="label">Повтор пароля</label>
+                            <div className="control">
+                                <input type="password" className="input"
+                                       onChange={this.handlePasswordConfirmBlur}/>
+                            </div>
+                            {this.state.errorPasswordConfirm &&
+                            <p className="help is-danger">
+                                {this.state.errorPasswordConfirm}
+                            </p>}
                         </div>
                         <div className="field is-grouped is-grouped-right">
                             <div className="control">
