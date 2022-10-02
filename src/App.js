@@ -7,6 +7,8 @@ import TodoDetail from "./TodoDetail";
 import {getAuth, onAuthStateChanged } from "firebase/auth"
 import firebaseApp from "./firebase"
 import Register from "./Register";
+import Logout from "./Logout";
+import Login from "./Login";
 
 const date1 = new Date(2021, 7, 19, 14,5);
 const date2 = new Date(2021, 7, 19, 15, 23);
@@ -113,13 +115,29 @@ export default class App extends Component{
                           Создать дело
                       </NavLink>
                       )}
-                      {this.state.currentUser && (
+                      {!this.state.currentUser && (
+                          <NavLink to="/login"
+                                   className={({isActive}) => 'navbar-item' + (isActive ? ' is-active' : '')}>
+                              Войти
+                          </NavLink>
+                      )}
+                      {!this.state.currentUser && (
                           <NavLink to="/register"
-                                   className={({isActive}) => 'navbar-item' + (isActive ? 'is-active' : '')}>
+                                   className={({isActive}) => 'navbar-item' + (isActive ? ' is-active' : '')}>
                               Зарегистрироваться
                           </NavLink>
                       )}
+
+
                   </div>
+                  {this.state.currentUser && (
+                      <div className="navbar-end">
+                          <NavLink to="/logout"
+                                   className={({isActive}) => 'navbar-item' + (isActive ? ' is-active' : '')}>
+                              Выйти
+                          </NavLink>
+                      </div>
+                  )}
               </div>
           </nav>
           <main className="content px-6 mt-6">
@@ -127,16 +145,25 @@ export default class App extends Component{
                   <Route path = "/" element={
                       <TodoList list = {this.state.data}
                                 setDone = {this.setDone}
-                                delete = {this.delete}/>
+                                delete = {this.delete}
+                                currentUser={this.state.currentUser}/>
                   }/>
                   <Route path = "/add" element={
-                      <TodoAdd add={this.add}/>
+                      <TodoAdd add={this.add}
+                               currentUser={this.state.currentUser}/>
                   }/>
                   <Route path = "/:key" element={
-                      <TodoDetail getDeed = {this.getDeed}/>
+                      <TodoDetail getDeed = {this.getDeed}
+                                  currentUser={this.state.currentUser}/>
                   }/>
                   <Route path = "/register" element={
                       <Register currentUser = {this.state.currentUser}/>
+                  }/>
+                  <Route path = "/logout" element={
+                      <Logout currentUser = {this.state.currentUser}/>
+                  }/>
+                  <Route path = "/login" element={
+                      <Login currentUser = {this.state.currentUser}/>
                   }/>
               </Routes>
           </main>

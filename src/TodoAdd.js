@@ -50,9 +50,11 @@ export default class TodoAdd extends Component {
         this.setState((state) => ({redirect: true}))
     }
     render() {
-        if (this.state.redirect)
-            return <Navigate to="/"/>;
-        else
+        if (!this.props.currentUser)
+            return <Navigate to="/login" replace />;
+        else if (this.state.redirect)
+            return <Navigate to="/" />;
+        else {
             return (
                 <section>
                     <h1>
@@ -81,7 +83,7 @@ export default class TodoAdd extends Component {
                                     <input className="file-input"
                                            type="file"
                                            accept="image/*"
-                                           onChange={this.handleImageChange} />
+                                           onChange={this.handleImageChange}/>
                                     <span className="file-cta">
                                         <span className="file-label">
                                             Графическая иллюстрация...
@@ -102,6 +104,7 @@ export default class TodoAdd extends Component {
                 </section>
 
             )
+        }
     }
 
 }
